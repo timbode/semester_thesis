@@ -1,0 +1,367 @@
+%  Add 'draft' option to mark overfull boxes with black boxes
+%  Add 'showpacs' option to make PACS codes appear
+\documentclass[aps,prb,twocolumn,showpacs,superscriptaddress,groupedaddress]{revtex4}  % for review and submission
+%\documentclass[aps,preprint,showpacs,superscriptaddress,groupedaddress]{revtex4}  % for double-spaced preprint
+\usepackage{graphicx}  % needed for figures
+\usepackage{dcolumn}   % needed for some tables
+\usepackage{bm}        % for math
+\usepackage{amssymb}   % for math
+\usepackage{amsmath}
+\usepackage{subfigure}
+\usepackage[english]{babel}
+\usepackage{alltt}
+% avoids incorrect hyphenation, added Nov/08 by SSR
+\hyphenation{ALPGEN}
+\hyphenation{EVTGEN}
+\hyphenation{PYTHIA}
+
+
+\begin{document}
+
+% The following information is for internal review, please remove them for submission
+\widetext
+%\leftline{Version I as of \today}
+%\leftline{Author: Tim Lappe}
+
+
+% the following line is for submission, including submission to the arXiv!!
+%\hspace{5.2in} \mbox{Fermilab-Pub-04/xxx-E}
+
+\title{Attempt of a Bayesian Search for the Standard Model Higgs Boson\\
+\textnormal{\small{Semester Thesis at ETH Z\"urich - Prof. C. Grab}}}
+      % D0 authors (remove the first 3 lines
+                             % of this file prior to submission, they
+                             % contain a time stamp for the authorlist)
+                             % (includes institutions and visitors)
+\date{\today}
+\author{Tim Lappe\\
+\small{Supervisor: Philipp Eller}}
+
+
+\begin{abstract}
+The $VH \rightarrow b\overline{b}$ mode of the $\sqrt{s}=8$ TeV data set taken at CMS is investigated by means of a Bayesian analysis. After deriving the model and the prior for the signal strength, some comments on the distinction between the Bayesian and freqeuntist approach are made. The posterior distribution for the signal strength given the data is computed, with remarks given on the implementation. The result displays no evidence for the signal hypothesis in the data, which is in discrepancy to the offical analysis. Some possible sources of this problem are outlined.
+\end{abstract}
+
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+The goal of this work is to develop an analysis of data taken at CMS, not by means of frequentist methods, but deriving from first principles. Since the focus lies on the statistics, brief reference to the underlying Standard Model (SM) physics will suffice for our purposes. Details of the detector, event reconstruction and selection shall be ignored in this limited context. For further information see the references \cite{observation,search,jets,annote}. It must be stressed that for the duration of the present ana\-lysis, the Higgs boson will be treated as if it had not yet been discovered.\\
+Data were taken at a center-of-mass energy of $\sqrt{s}=8$ TeV; the integrated luminosity is $L= 19.0 fb^{-1}$. The decay mode to be investigated is $H \rightarrow b\overline{b}$. As can be seen in fig. \ref{fig:cross}, the Higgs production in proton-proton collisions is dominated by gluon-gluon fusion. But since in this case the b-quarks are pratically drowned in a background of QCD processes, one effective possibility is to concentrate on the channels of associated production with vector bosons, though their cross sections are relatively small. Hence the search at CMS for the given decay mode was looking for the traces of $Z$ and $W$ bosons together with the b-quarks coming from the hypothetical Higgs. Note also the characteristic shape of the bran\-ching ratio in the mass regime of interest (fig. \ref{fig:branching}): between 110 and 150 GeV, it drops from nearly 1 to only a fraction of that value, which is expected to decrease the resulting number of events. The mass interval is explored in steps of 5 GeV, that is, for each of the 9 discrete values, a specific Monte Carlo simulation of the signal is available.\\
+\begin{figure}[ht]
+\includegraphics[width=\linewidth]{Higgs_XS_8TeV_lx}
+\caption{\label{fig:cross} Production cross sections at $\sqrt{s}= 8$ TeV.\cite{annote}}
+\end{figure}
+\begin{figure}[ht]
+\includegraphics[width=\linewidth]{YRHXS_BR_fig1}
+\caption{\label{fig:branching} Decay branching ratios of the SM Higgs Boson.\cite{annote}}
+\end{figure}
+Concerning the modes of the vector bosons, we have the $Z$ decaying to leptons (neglecting hadronic $\tau$):
+\begin{align*}
+Z \rightarrow l^{-}l^{+}
+\end{align*}
+or to neutrinos:
+\begin{align*}
+Z \rightarrow \nu\overline{\nu};
+\end{align*}
+whereas the $W$ decays to a lepton-neutrino pair:
+\begin{align*}
+W \rightarrow l\nu_{l}.
+\end{align*}
+The primary backgrounds arise from V+jets, top quark and diboson production. The first may be discriminated from the signal through the $p_{T}$ spectrum, as can be seen from an example: If a Z is produced together with two or more jets, which in turn possibly arise from $b$ quarks, the process bears close resemblance to the signal. However, in this case, the vector boson is not boosted, as opposed to a $Z$ and Higgs stemming from the same particle and therefore having high $p_{T}$ values. Details on top quarks can be found in the annotation note \cite{annote}. The diboson production proves to be the most problematic background. If one of the two decays to leptons, while the other goes to $b\overline{b}$, the signature is the same as for a signal event. The decisive difference is in the invariant mass of the respective vector boson and the Higgs.\\
+The input to the search comes from multivariate ana\-lysis (MVA), more specifically from a Boosted Decision Tree (BDT). To summarize, the BDT develops selection criteria to discern signal from backround. It does so by optimizing its branches with respect to the maximization of signal and background separation. The trai\-ning is based on independent Monte-Carlo simulated samples, where the tree is told in advance whether an event is "s" or "b". Signal-like events get assigned values closer to 1, background-like closer to -1. After the training is completed, the observed data are given to the tree and classified accordingly. MC and observed data are binned on the range $[-1,1]$. The statistical problem to be faced is thus a counting experiment for the BDT value.
+
+\section{The Model}
+When speaking of "first principles" in the context of probability theory, this is intended to be understood in the sense presented by Jaynes\cite{jaynes}, who sets up the rules of probability as a "normative extension of logic" \footnote{Jaynes, p. 655}, designed to include both the Bayesian and the frequentist schemes, but being intrinsically Bayesian. Frequentist methods usually come along as \emph{ad hoc} procedures, capable only of handling specific problems. Therefore they suggest that the tools of probability theory were somewhat arbitrary, that there did not exist a unique way in which to handle things. With "probability theory as logic", this seems not to be true. The basic rules constrain the possible formulas such that there remains virtually only one correct possibility. Seen accordingly, the formula to be derived below could be considered as the natural one, whereas anything departing from it would have to be seen as an approximation, valid or invalid. The obvious source of arbitrariness that enters a Bayesian calculation, the prior information, can be argued to be irreducible\footnote{Reference missing.}. Let it also be emphasized that this line of reasoning must be differentiated from that of de Finetti; see Jaynes' book for details.\\
+\\
+Here the starting point is only the product rule in its elementary form:
+\begin{equation}
+P(A,B)=P(A)P(B|A)=P(B)P(A|B).
+\end{equation}
+From this, \emph{Bayes' rule} is obtained readily:
+\begin{equation}
+P(A|B)=\frac{P(A)P(B|A)}{P(B)}.
+\end{equation}
+Given that we are trying to quantify a counting experiment on binned data, the first thing to define is the \emph{likelihood function} on a single bin as a Poissonian density. It is customary to write the expected event yields in the form $\mu s + b$, where $\mu$ is the ratio of observed and predicted (SM) cross section. In this way,
+\begin{equation}
+f(N_{k}|s_{k},b_{k},\mu)=\frac{(\mu s_{k}+b_{k})^{N_{k}}}{N_{k}!}e^{-(\mu s_{k}+b_{k})}.
+\end{equation}
+$s_{k}$ and $b_{k}$ are to be read as the sum of the contributions of the respective signal and background processes on bin $k$ of the given data set. $N_{k}$ is the number of observed data events. Systematic uncertainties are yet left implicit.\\
+Since the bins are taken to be statistically independent, the full likelihood function must then be given by
+\begin{equation}\label{eq:likelihood}
+L(\{N_{k}\}|\{s_{k}\},\{b_{k}\},\mu)=\prod\limits_{k}f(N_{k}|s_{k},b_{k},\mu).
+\end{equation}
+The product runs over all bins of the entire data set, the number of which will be roughly half a thousand.\\
+The next thing to do for a Bayesian is to introduce a prior for the parameter of interest, $\mu$. The form of the prior will be left unspecified for the moment, but we note that the joint probability for the observed data and fixed $\mu$ will be
+\begin{equation*}
+L(\{N_{k}\},\mu|\{s_{k}\},\{b_{k}\})=\pi(\mu|\{s_{k}\},\{b_{k}\})\prod\limits_{k}f(N_{k}|\dotsi).
+\end{equation*}
+The prior $\pi$ as well as the likelihood are conditioned on the expected signal and background yields and impli\-citly on the systematics. It will become clear later why we choose the prior for the signal strength to be condtioned on the expected yields.\\
+To find suitable priors, let $z_{k}$ be the expected yield of an arbitrary process on bin $k$. Because the expected yields consist of sums of individually weighted events which in turn are generated from a large number of weighted Monte-Carlo simulations, a Gaussian prior can reasonably be assumed for $z_{k}$. The other choice at hand would be a Poissonian, but this does not do, since the error on an expected yield is computed as the square root of the sum of the squares of the weights and is therefore different from the Poissonian error.\\
+The \emph{shape systematics}, in our case mainly the b-tagging efficiency, are given in the form of histograms for the expected yields, where the corresponding shape parameters take on low, middle an high values. The effect on the expected yield varies from process to process and bin to bin, so that a "high" value of the shape parameter must not necessarily result in a higher expected yield. However, all shape systematics are taken to be correlated over the entire data set. Writing $\xi_{k}^{j}$ for the $j$-th systematics on bin $k$, the prior for $z_{k}$ assumes the preliminary form
+\begin{equation}
+\pi(z_{k}|\{\xi_{k}^{j}\})\propto exp(-(z_{k}-(\mu_{k}+\sum\limits_{j}^{\sim}(\xi_{k}^{j}-\mu_{k})))^{2}/2\sigma_{k}^{2}).
+\end{equation}
+The tilde on top of the sum indicates that the sum runs only over those shapes that are relevant for the process given. $\sigma_{k}$ is the statistical uncertainty of process $z$ on bin $k$ and bears no subscript, leaving its dependency on $z$ understood. $\xi_{k}^{j}$ will take on parametrized values $0,1,2$ corresponding to the three discrete cases indicated above. While the "middle" value is held to be the most probable, the exact influence of shape parameters on expected yields is not known. For this reason, no parametrization and, equivalently, no prior distribution can be given: the set has to remain discrete. Facing this, it appears to be smartest to impose a flat prior for the discrete set of values, and so, abandoning the prospective of a normalized posterior distribution, to drop it completely. As is to be seen, numerically, the normalization will prove difficult in any case.\\
+There is a critique which concerns the Monte-Carlo generation of expected yields: For the "middle" values of the shape parameters, there exist histograms both for the sum of weights (the expected yield) and the corresponding error; for the other two parameter values, only the expected yields have been generated, which forces us to use the statistical error from the former also for the latter two.\\
+The \emph{lognormal systematics}, e.g. on the integrated luminosity, describing relative changes of the expected yields, need yet to be incorporated.
+\begin{equation*}
+\pi(z_{k}|\{\alpha^{i}\},\{\xi_{k}^{j}\})\propto e^{-(-(z_{k}-(\mu_{k}+(\prod\limits_{i}^{\sim}\alpha_{i})\sum\limits_{j}^{\sim}(\xi_{k}^{j}-\mu_{k})))^{2}/2\sigma_{k}^{2})}
+\end{equation*}
+is the obvious ansatz. The scaling parameter $\alpha^{i}$ describes the $i$-th lognormal uncertainty; all are considered to correlate over the entire data set. For them we are able to specify prior distributions.\\
+Naively, one would try
+\begin{equation*}
+\pi(\{\alpha_{i}\})=\prod\limits_{i}e^{-ln^{2}\alpha_{i}/2\sigma_{i,z}^{2}},
+\end{equation*}
+where $\sigma_{i,z}$ depends on the process and is not to be confused with the statistical uncertainty $\sigma_{k}$: it is the fraction of relative change by which the expected yield is affected, i.e. $\sigma_{i,z}=0.05$ for a 5\% scaling. Here,
+\begin{equation*}
+\alpha_{i}=x \Rightarrow \pi(\alpha_{i})=e^{-ln^{2}x/2\sigma_{i,z}^{2}}.
+\end{equation*}
+But with $\sigma_{i,z}$ depending on the processes, the above prior gets in conflict with the fact that the lognormal uncertainties are fully correlated. If that is to be, there must be only \emph{one} prior for each $\alpha_{i}$. Then the sigma of the lognormals must not depend on the processes. The way out is to employ the following change of variables: $\alpha_{i}\to\alpha_{i}^{\sigma_{i,z}}$ (note that $\alpha$ is not superscripted, but exponentiated by $\sigma_{i,z}$) and take
+\begin{equation*}
+\pi(\{\alpha_{i}\})=\prod\limits_{i}e^{-ln^{2}\alpha_{i}/2}.
+\end{equation*}
+Then
+\begin{equation*}
+\alpha_{i}^{\sigma_{i,z}}=x \Rightarrow \pi(\alpha_{i})=e^{-(\frac{ln x}{\sigma_{i,z}})^{2}/2}=e^{-ln^{2}x/2\sigma_{i,z}^{2}},
+\end{equation*}
+so to any given value $x$ there corresponds the correct prior probability.\\ 
+We are now in a position to write down the full prior probability over all bins for the expected yields of the process $z$:
+\begin{equation}\label{eq:priors}
+\begin{split}
+\pi(syst)\pi(\{z_{k}\}|syst)=(\prod\limits_{i}e^{-ln^{2}\alpha_{i}/2})\times\\
+\times(\prod\limits_{k}exp(-(z_{k}-(\mu_{k}+(\prod\limits_{i}^{\sim}\alpha_{i}^{\sigma_{i,z}})\sum\limits_{j}^{\sim}(\xi_{k}^{j}-\mu_{k})))^{2}/2\sigma_{k}^{2}))
+\end{split}
+\end{equation}
+The expected yields $z_{k}$ and the systematic uncertainties are \emph{nuisance parameters} in our model. In a Bayesian analysis, these have to be treated by marginalization. Combining the joint likelihood and eq. \ref{eq:priors} and then integrating gives
+\begin{widetext}
+\begin{equation}\label{eq:joint}
+L(\{N_{k}\},\mu)=\sum\limits_{\xi^{1}=0}^{2}\sum\limits_{\xi^{2}=0}^{2}\dotsi\sum\limits_{\xi^{j}=0}^{2}\dotsi \int_{0}^{\infty}d\{\alpha_{i}\}\int_{-\infty}^{+\infty} d\{z\}\pi(syst)\pi(\{z\}|syst)L(\{N_{k}\},\mu|\{s_{k}\},\{b_{k}\};syst),
+\end{equation}
+\end{widetext}
+where $d\{z\}$ means integration over all processes and bins; similarly, $\pi(\{z\}|syst)$ is the product of the $\pi(\{z_{k}\}|syst)$ over all processes. Since the shape systematics are definded on discrete sets, the integrals are replaced by sums.\\
+The last step entails the transition from the joint probability of eq. \ref{eq:joint} to the \emph{posterior distribution}:
+\begin{equation}
+P(\mu|\{N_{k}\})=\frac{L(\{N_{k}\},\mu)}{\pi(\{N_{k}\})},
+\end{equation}
+with $\pi(\{N_{k}\})=\int d\mu L(\{N_{k}\},\mu)=const$. In the end, we are looking for an extremum, so the normalization may reasonably be ignored and we take
+\begin{equation}
+P(\mu|\{N_{k}\}) \propto L(\{N_{k}\},\mu).
+\end{equation}
+
+\section{The Prior}
+Choosing the prior for the signal strength, $\mu$, has been postponed up to this point. In high energy physics, it seems to be common to take it as flat. From the Bayesian point of view, however, this is not entirely satisfactory: to express complete ignorance about a scale parameter present in the parameter of a Poissonian (which is what we want in the present scope), the \emph{Jeffreys prior}\cite{jeffreys} is the right choice. Only for a location parameter, which $\mu$ is not, would a flat prior be adequate; and of course, in this case, the Jeffreys prior \emph{is} flat. This can be seen from a simple invariance argument.\cite{sivia,bretthorst}\\ 
+For a location parameter, complete ignorance about the value of a variable $x$ on some interval would be expressed by the requirement that the assigned probability be more or less the same everywhere:
+\begin{equation}
+P(x|I)dx \approx P(x+a|I)d(x+a),
+\end{equation}
+which means no more than
+\begin{equation}
+P(x|I) \approx P(x+a|I) \approx const.
+\end{equation}
+on the given interval. The conditional information $I$ expresses the fact that, for a Bayesian, there is no real difference between a prior and a conditional or posterior distribution, because in any case, be it merely implicitly, we happen to condition on some kind of previous knowledge.\\
+Regarding scale parameters, the argument is slightly modified. The reasoning here is that multiplication of the parameter with a constant should not much alter the predictions: it is rather the order of magnitude than the exact position of the parameter about which we are uncertain. Hence
+\begin{equation}
+P(\mu|I)d\mu \approx P(\alpha\mu|I)d(\alpha\mu),
+\end{equation}
+which is equivalent to
+\begin{equation}
+\alpha^{-1}P(\mu|I) \approx P(\alpha\mu|I),
+\end{equation}
+and so $P(\mu|I) \propto 1/\mu$.\\
+More formally, the Jeffreys prior can be calculated from the \emph{Fisher information}\cite{kuensch}. It is definded as
+\begin{equation}
+I(\lambda)=-E[\frac{d^{2}}{d\lambda^{2}}log P]
+\end{equation}
+For a Poissonian $P(N|\lambda)=\frac{\lambda^{N}}{N!}e^{-\lambda}$, $log P\cong N log\lambda - \lambda$ and
+\begin{equation}
+\frac{\partial^{2}}{\partial\lambda^{2}}log P=-\frac{N}{\lambda^{2}}.
+\end{equation}
+The Fisher information is then
+\begin{equation}
+\begin{split}
+I(\lambda)=-E[-\frac{N}{\lambda^{2}}]=\sum\limits_{N=0}^{\infty}\frac{N}{\lambda^{2}}P(N|\lambda)=\\
+\frac{e^{-\lambda}}{\lambda}\sum\limits_{N=1}^{\infty}\frac{N}{\lambda}\frac{\lambda^{N}}{N!}=\frac{e^{-\lambda}}{\lambda}\sum\limits_{N=1}^{\infty}\frac{\lambda^{N-1}}{(N-1)!}=\frac{1}{\lambda},
+\end{split}
+\end{equation}
+and so the Jeffreys prior, which is defined as the square root of the Fisher information, is
+\begin{equation}
+\pi(\lambda)=\sqrt{I(\lambda)}=\frac{1}{\sqrt{\lambda}}.
+\end{equation}
+Now, in our case
+\begin{equation}
+P_{k}(N_{k}|s_{k},b_{k},\mu)=\frac{(\mu s_{k}+b_{k})^{N_{k}}}{N_{k}!}e^{-(\mu s_{k}+b_{k})};
+\end{equation}
+therefore
+\begin{equation}
+\frac{\partial^{2}}{\partial\mu^{2}}log P_{k}=-\frac{N_{k}s_{k}^{2}}{(\mu s_{k}+b_{k})^{2}}=s_{k}^{2}\frac{\partial^{2}}{\partial(\mu s_{k}+b_{k})^{2}}log P_{k},
+\end{equation}
+and so
+\begin{equation}
+I_{k}(\mu)=\frac{s_{k}^{2}}{\mu s_{k}+b_{k}}.
+\end{equation}
+The Jeffreys prior for one bin would be
+\begin{equation}
+\pi_{k}(\mu|s_{k},b_{k})=\frac{s_{k}}{\sqrt{\mu s_{k}+b_{k}}},
+\end{equation}
+which appears to be a reasonable choice as it is not singular at 0, contrary to the prior for standard Poissonians above; it puts an emphasis on $\mu=0$, a desirable property for a model that aims to be conservative. The dependency on $s$ and $b$ does also make sense: for fixed $\mu$, the bin with the highest fraction of signal compared to the Poissonian error of the total expected yield will be weighted most strongly; on this bin, the probability that the signal was caused by (upward) fluctuation of the background is smallest. Note also that the functional form of the prior is not expected to deviate much from a flat prior, for typical values of $s$ and $b$. Fig. \ref{fig:jeffreys} shows two exemplary plots: for low signal-to-noise ratio, the deviation from flatness is negligible; for high ratio, the origin is pronounced more vigorously. On the blue curve, $\pi_{k}(0)/\pi_{k}(1)=1.29$.
+\begin{figure}[ht]
+\includegraphics[width=\linewidth]{jeffreys}
+\caption{\label{fig:jeffreys} Single-bin Jeffreys prior for large (blue) and low (red) signal-to-noise ratio.}
+\end{figure}
+
+The likelihood is the product over all of the Poissonians $P_{k}$ and so
+\begin{equation*}
+log L=log \prod\limits_{k}P_{k}=\sum\limits_{k}log P_{k}.
+\end{equation*}
+Accordingly,
+\begin{equation*}
+\frac{\partial^{2}}{\partial\mu^{2}}log L=\sum\limits_{k}\frac{\partial^{2}}{\partial\mu^{2}}log P_{k},
+\end{equation*}
+and the Fisher information  satisfies
+\begin{equation*}
+I(\mu)=-\sum\limits_{k}E[\frac{\partial^{2}}{\partial\mu^{2}}log P_{k}]=\sum\limits_{k}\frac{s_{k}^{2}}{\mu s_{k}+b_{k}}=\sum\limits_{k}I_{k}(\mu).
+\end{equation*}
+The final choice for the prior then is
+\begin{equation}\label{eq:jeffreys}
+\pi(\mu|\{s_{k}\},\{b_{k}\})=\sqrt{\sum\limits_{k}\frac{s_{k}^{2}}{\mu s_{k}+b_{k}}}.
+\end{equation}
+We see now why it was good to let the signal strength prior be conditioned on the expected yields: in this way, it is possible to find an explicit analytic formula. Alternatively, one could have multiplied eq. \ref{eq:likelihood} with the priors for the expected yields and marginalized the result, and only afterwards included the prior for $\mu$; but then an analytic expression for it could no longer have been given. The disadvantage is that the prior in eq. \ref{eq:jeffreys} cannot be factorized, which thus will also be true of the integrals in eq. \ref{eq:joint}.
+
+\section{Bayesian Versus Frequentist}
+The debate between the to schools has been going on for a long time, and, to cite Jaynes\footnote{Jaynes, Preface, p. xxii}, ''there was a strong tendency, on both sides, to argue on the level of philosophy or ideology''. But although Jaynes entitles himself to have been "an outspoken partisan on the Bayesian side", on the basis of the work condensated in his book, he comes to the more moderate conclusion that "neither the Bayesian nor the frequentist approach is universally applicable". Rather, he views the rules of probability theory as "the unique consistent rules for conductiong inference of any kind". Of course, his system is first of all Bayesian; still he acknowledges that "the traditional 'frequentist' methods are usable and useful in many particularly simple, idealized problems". To him, the main drawbacks are that "frequentist methods provide no technical means to eliminate nuisance parameters or to take prior information into account", both of which are important in the present context.\\
+Today perhaps, the battlefield has somewhat shifted, away from the classical domain of statistics and probability, towards other areas even such as the foundations of quantum mechanics. There it continues to bear strange fruits, an example being the interpretation of quantum mechanics that has become known as "QBism"\cite{qbism}. In a paper from this context\cite{schack}, it is stated that "the frequentist decision rule, which underlies much of current statistical practice, is fundamentally flawed", and a popular saying of Harold Jeffreys' is quoted, proclaiming that "a hypothesis that
+may be true may be rejected because it has not predicted observable results that have not occurred. This seems a remarkable procedure. On the face of it, the fact that such events have not occurred might more reasonably be taken as evidence for the law, not against it". This aims at the usual frequentist confidence level (CL) and is sharp-tongued indeed. However, as an illustration of the fact that promoters of hot debates tend to be tilting at windmills, we shall try to argue in the more moderate sense of Jaynes and show that, at least in this particular case, frequentist an Bayesian methods are not as much at variance as some might want to think.\\
+The basic requirement for this is that 
+\begin{equation}\label{eq:postlikeli}
+P(\mu|N)\approx L(N|\mu),
+\end{equation}
+where $\mu$ is some parameter to be estimated from the data, $N$; $P$ denotes the Baysian posterior distribution, quantifying an inference about $\mu$ based \emph{on} the data, as opposed to the frequentist likelihood which connects the "true" value of the parameter to the data, the question being rather which value is most likely to have given this one specific set of observations. The condition of \ref{eq:postlikeli} is generally fulfilled in two cases: (1) the prior is flat, (2) there are enough data available to make the prior information irrelevant. Now the Bayesian credible interval would be a statement on the width of the posterior distribution: the frequentist confidence interval is given through the construction of a confidence belt for some significance $\alpha$ and power $\beta$. Under condition \ref{eq:postlikeli} they fall together.\footnote{At least for simple cases, e.g. Gaussian distributions.}\\
+So what if (1) or (2) do not hold? As Jaynes remarks, they are the crucial points where Bayesian and frequentist methods differ, not only quantitatively, but rather in questions of applicability. When cogent prior information is available, this alters the results in a Bayesian estimate, the more the less data have been obtained. Here, we could think about replacing the adopted Jeffreys prior by a deliberatly non-conservative one, peaking at $\mu=1$ with some standard deviation. This would mean to answer a different question: not "Is there a signal?" but "Given \emph{that} there is, do the data confirm it?"
+
+\section{The Data}\label{sec:data}
+Having prepared the formula for the analysis, it is time to have a first look at the data. Figs. \ref{fig:Zee} to \ref{fig:Wmn} display the 13 subchannels that will enter the computation. Quite generally, only the high $p_{T}$ bins show a considerable amount of signal (red). Focussing on these for the moment (always the top-most histogram), we can make out by eye that there is more or less as much evidence as counterevidence in the data: $Z(ee)$ and $Z(\mu\mu)$ seem to balance each other, $Z(\mu\nu)$ and $W(\mu\nu)$ have an overflow while $W(e\nu)$ has an underflow. That being said, we expect conservative results, perhaps slightly in favor of the signal hypothesis.\\
+On the other hand, for a problem with very small statistics, background fluctuations are more likely to have been the source of an excess, and this will automatically be taken into account by probability theory. Indeed, generating toy data with low statistics for a signal strength of $\mu=1$ and then estimating the parameter from the toys does not necessarily result in $\mu=1$ being the MLE: if the statistics are small enough, the estimate will be "pulled" into the direction of $\mu=0$, which produces a result slightly below the value of the "true" parameter. This effect votes for a negative result when it comes to observing a signal, so our expectations should remain conservative.
+\begin{figure}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Zll_ZeeHighPt_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Zll_ZeeLowPt_PreFit}}
+\caption{\label{fig:Zee} Histograms of the BDT output for $Z(ee)$ in the high (top) and low (bottom) $p_{T}$ regime. Plots are logarithmic for "better visibility". Signal is marked in red; signal-to-noise ratio is negligible in the low $p_{T}$ bin.}
+\end{figure}
+
+\begin{figure}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Zll_ZmmHighPt_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Zll_ZmmLowPt_PreFit}}
+\caption{\label{fig:Zmm} Histograms of the BDT output for $Z(\mu\mu)$ in the high (top) and low (bottom) $p_{T}$ regime. Plots are logarithmic for "better visibility". Signal is marked in red; signal-to-noise ratio is negligible in the low $p_{T}$ bin.}
+\end{figure}
+
+\begin{figure}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Znn_HighPt_ZnunuHighPt_8TeV_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Znn_MedPt_ZnunuMedPt_8TeV_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Znn_LowPt_ZnunuLowPt_8TeV_PreFit}}
+\caption{\label{fig:Znunu} Histograms of the BDT output for $Z(\nu\nu)$ in the high (top), middle (center) and low (bottom) $p_{T}$ regime. Plots are logarithmic for "better visibility". Signal is marked in red; signal-to-noise ratio is negligible in the middle and low $p_{T}$ bins.}
+\end{figure}
+
+\begin{figure}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Wln_ch1_Wenu3_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Wln_ch1_Wenu2_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Wln_ch1_Wenu_PreFit}}
+\caption{\label{fig:Wen} Histograms of the BDT output for $W(e\nu)$ in the high (top), middle (center) and low (bottom) $p_{T}$ regime. Plots are logarithmic for "better visibility". Signal is marked in red; signal-to-noise ratio is negligible in the middle and low $p_{T}$ bins.}
+\end{figure}
+
+\begin{figure}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Wln_ch2_Wmunu3_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Wln_ch2_Wmunu2_PreFit}}
+\subfigure{\includegraphics[width=0.9\linewidth]{BDT_Wln_ch2_Wmunu_PreFit}}
+\caption{\label{fig:Wmn} Histograms of the BDT output for $W(\mu\nu)$ in the high (top), middle (center) and low (bottom) $p_{T}$ regime. Plots are logarithmic for "better visibility". Signal is marked in red; signal-to-noise ratio is negligible in the middle and low $p_{T}$ bins.}
+\end{figure}
+
+\section{Remarks On the Implementation}
+The evaluation of a multidimensional integral such as eq. \ref{eq:joint} is most practically achieved by \emph{Monte Carlo} (MC) integration. The program was implemented in \emph{Python}, the integration relies on a modification of the \emph{mcint}\cite{mcint} package. Due to runtime restrictions resulting from the limited scope of the project, strong approximating assumptions had to be made. Still, in principle, the program is capable of handling the full problem, without any simplification. For this to be feasible though, much effort in optimization would be required.\\
+The algorithm for the integration works in the following way:
+\begin{alltt}
+Integrand=f(x_{1},...x_{m})
+Intervals=[a_{k},b_{k}]
+Result=0
+for j in 0 to N:
+    for k in 0 to m:
+        Draw random number z_{k} from [a_{k},b_{k}]
+    Result+=f(z_{k})
+Result*=1/N
+Result*=Measure
+Return Result
+\end{alltt}
+Before the result is given back, it is multiplied by the \emph{Lebesgue measure} of the domain of integration, defined as the product of the length of the separate intervals. Since we do not normalize, and because the large number of integration variables produces a measure that breaks the threshold of float precision, this step is omitted in the actual computation. This might be a source of bias (though effectively it is not, as will be argued below).\\
+The relevant quantities that influence the runtime of the program are the following: (1) the number of summation variables, $j$, (2) the number of random draws, $N$, (3) the size of the intervals (depending on which $N$ changes, with respect to accuracy) and (4) the number of integration variables, $m$. The latter splits up into the number of lognormal systematics, denoted above by $\alpha_{i}$, and the variables of the expected yields, $z_{k}$, that are subject to statistical uncertainty. The means of the Gaussian priors we have chosen for the $z_{k}$ depend both on the $\alpha_{i}$ and the shape systematics, $\xi_{j}$, and therefore the integration intervals do also. Since for numerical integration they have to be finite and should be focussed around the maximum of the integrands if we are to safe runtime, the integration has to be split up, the $\alpha_{i}$ coming to rest on the outside, as in eq. \ref{eq:joint}. Hence we end up with a nested MC integration and the number of random draws splits up as well, for outer and inner integration. The intervals of the inner then depend on the randomly drawn values of the $\alpha_{i}$, as well as on the parametrized $\xi_{i}$. This entails that the inner integration intervals have to be computed for each random draw of the $\alpha_{i}$, which in turn means that the corresponding Lebesgue measure will fluctuate; however, the high number of integration variables leads to a high value for the measure itself, making the fluctuations negligible, to an extent that they even become indiscernible. The dominating contribution, with respect to runtime, comes from the sum of the $\xi_{j}$; for each summand, the entire integral has to be performed.\\
+To be quantitative, the number of shape systematics for the entire data set is $j=19$, each $\xi_{j}$ running from 0 to 2. The number of summands is $3^{19}$, roughly a billion, to high by far for a realistic treatment in this context. In the end, only the most important shape will be included, which is bound to be the b-tagging efficiency. The lognormal systematics are 63 and pose no further problem. The $z_{k}$ pile up to approximately 4300 variables. Imposing a selection criterion of sigma being greater than 0.1 reduces them to $\sim 2600$. The actual computations are done so far with a criterion of $\sigma > 1$, which reduces the number to $\sim 500$. This means of course to assume much more prior information than is available, the effect of which is to be studied later. In any case, the number of integration variables is not expected to affect the runtime as much as does the number of random draws, which indicates there might be some flexibility here.\\
+Actually, it is not eq. \ref{eq:joint} that is computed, but rather a modification. In order to keep the numbers away from 0, in computing the integrand of eq. \ref{eq:joint} we take the logarithm of the separate components, and, instead of multiplying them, just add their logarithms. Hence the MC integration does not add probabilities, but negative logarithms thereof. Analytically, the integral of the logarithm of a function is different from the integral of the function itself, but numerically this does not matter: the minimum we are looking for will stay at the same position.
+
+\section{Results}
+\begin{figure}[ht]
+\includegraphics[width=\linewidth]{result}
+\caption{\label{fig:result} Preliminary approximated result. The plot displays 5 separate mappings of the signal strength parameter for $m_{H}=125$ GeV in the region $[0,2.5]$ (dashed coloured lines); the black line shows the average. Fluctuations are due to MC integration. The Higgs hypothesis is parametrized by $\mu=1$. The hypothesis favoured by the data is given by the minimum. }
+\end{figure}
+
+\begin{figure}[ht]
+\includegraphics[width=\linewidth]{mu_19plus5_multiBDT_25Apr}
+\caption{\label{fig:official-result} Signal strength from the official analysis. Note that the $\sqrt{s}=7$ TeV data are included.}
+\end{figure}
+Fig. \ref{fig:result} shows the preliminary result of the computation. For now, only $m_{H}=125$ GeV is being considered. The number of random draws in the MC algorithm was $N=100$ both for the inner and outer intergration, which is not expected to give very exact results; still, as can be seen from the plot, though fluctuations are present, the overall shape seems to be robust, even at this level of approximation. Quantitatively, the relative error in the MC integration of a single lognormal of unit width, as done in the computation, is about 0.2; that for a Gaussian of unit width is about 0.15. To obtain fully reliable results, $N$ should be increased by at least one order of magnitude; this lowers both errors to about 0.05.\\
+The minimun lies obviously around 0, so the data vote for $\mu\sim0$. Unfortunately, it is not possible to derive the relative probabilty of signal-plus-background and background-only hypothesis from this plot, because the integral (effectively: the sum) of the posterior probabilities is not related to that of the negative logarithms of the latter. For increasing values of $\mu$, the plot goes off to infinity, which is what would be expected and therefore provides a criterion of consistency.\\
+Comparing with Fig. \ref{fig:official-result}, showing the signal strength against the mass from the official analysis\cite{annote}, we find a discrepancy between the two results. The inclusion of the $\sqrt{s}=7$ TeV data in the official analysis alone cannot be an explanation for this: though it certainly has an effect on the significance, it is not likely to be the cause of the shift in the peak of the two plots. In Fig. \ref{fig:official-result}, the extremum peak is almost exactly at $\mu=1$, the 0 lying outside the uncertainty band. So far, we are not in a position to give the standard deviation of the posterior distribution, but qualitatively, one could argue that the two results are practically opposite: the favoured value of the one lies towards the tails of the other. It will be very interesting to find out the reason for this discrepancy.\\
+To quantify the effect of the Jeffreys prior on our result, the computation is going to be carried out with a flat prior, as is common in high energy physics. Also, an attempt is going to be made to quantify the relative probability through the \emph{Bayes factor}; this might prove difficult from a computational point of view: exponentiating the computed logarithms to get actual probabilities blows up the error, which means that to avoid fluctuations even across orders of magnitude, the number of random draws in the MC integration must be increased, which in turn has to be bought by greater runtime (the error only decreases with $\sqrt{N}$ while the runtime scales linearly). Furthermore, results could be computed for the various mass hypotheses.\\
+
+\section{Discussion \& Outlook}
+The full discussion will have to be postponed until all results are available; this preliminary requires further discussion itself.\\
+The central question to be answered is about the discrepancy between the results of this analysis and the official one, that is, about the differences between the Bayesian and frequentist approach.\\
+Suppose for a moment that the Jeffreys prior turns out to be the cause: then the problem is shifted again to "the level of philosophy", in a certain sense; for somebody might want to argue that a flat prior was the right way to express complete ignorance in this case, even though one can demonstrate (as was done above) that it is not. If on the other hand one accepted the Jeffreys prior as the correct choice, using a flat one would mean to assume prior information implicitly: not pronouncing the background-only hypothesis, when it would have to be, is then tantamount to \emph{pronouncing} the signal hypothesis, and therefore to assuming implicitly that there \emph{is} a signal. This would not be conservative, of course.\\
+If the Jeffreys prior does not make that much a difference, the root of the diverging results must lie elsewhere. When we remember the parting points of Bayesian and frequentist schemes (prior information and nuisance parameters), the obvious place to look for next is the treatment of nuisance parameters. Abstracting from the runtime approximations that were necessary due to the limited scope of the project, and considering that one might expect a more precise computation to become less significant and more conservative anyway (though this is not obvious and has to be tested quantitatively), it is clear that the Bayesian way of dealing with nuisances can be seen as the superior one; naturally, the frequentist approach may still be a good approximation.\\
+Denoting the set of nuisance parameters by $\theta$, the frequentist method is based on the \emph{profile likelihood ratio}\cite{procedure, CMSthesis}:
+\begin{equation}\label{eq:profile}
+q_{\mu}=-2 ln \frac{L(data|\mu,\hat{\theta}_{\mu})}{L(data|\hat{\mu},\hat{\theta})}.
+\end{equation}
+The likelihood is the product of the Poissonians and the prior for the nuisances, $p(\tilde{\theta}|\theta)$, where $\tilde{\theta}$ is the default value of $\theta$. In the numerator, $\hat{\theta}_{\mu}$ is the conditional MLE given $\mu$; in the denominator, the global maximum is given by $\hat{\mu},\hat{\theta}$. There is a problem when $\hat{\theta}_{\mu}$ is too far off from the original value $\tilde{\theta}$ because then the generation of pseudo-data from the conditional MLE makes implicit use of the data as prior information; however, in most cases, the prior will dominate the extremum and no problem arises since the values stay close.\\
+In the Bayesian scheme, the posterior distribution can be written as
+\begin{equation}\label{eq:bayes}
+P(\mu|data)=\frac{1}{C}\int d\theta \pi(\theta|\tilde{\theta})\pi(\mu|\theta)L(data|\mu,\theta).
+\end{equation}
+The point now is whether one can argue that there is a direct correspondence between eq. \ref{eq:profile} and eq. \ref{eq:bayes}. If we ignore $\pi(\mu|\theta)$ and consider that $p(\tilde{\theta}|\theta)$ and $\pi(\theta|\tilde{\theta})$ are usually put in relation through a flat prior, then eq. \ref{eq:profile} appears as the approximation of the Bayesian formula, where the integrals are replaced by the integrand evaluated at the maximum and the logarithm is taken. So a first question would concern the validity of this approximation, quite generally. The difference in the way of handling the nuisance parameters is now specified more precisely.\\
+A second question might address what is entailed by the subsequent frequentist treatment of $q_{\mu}$: the generation of MC pseudo-data and the computation of the CLs; we have argued above that the frequentist confidence interval and the Bayesian analogue are not so far apart from each other, but this was on the basis of two assumptions which are not satisfied here, because we have both cogent prior information and small statistics.\\
+Third and last, it might be interesting to investigate an effect remarked upon by Sivia\footnote{p. 81}, the probability-theory version of \emph{Ockham's razor}, so to speak: in a Bayesian model selection problem, any new parameter introduced is paid for with a penalty. The background-only hypothesis possesses fewer parameters, so this could be an influence so far neglected.\\
+It seems that, aside from some sort of mistake in the model or implementation (which can always be present), there are a couple of possible origins to account for the observed discrepancy. By analogy, it touches on other results in the context, and hence it appears desirable to clarify the issue. 
+%\bibliographystyle{plain}
+%\bibliography{bibi}
+
+\begin{thebibliography}{}
+	\bibitem{observation}
+		The CMS Collaboration, Observation of a new boson with mass near 125 GeV in pp collisions at $\sqrt{s}=7$ and 8 TeV, arXiv:1303.4571, 2013.
+	\bibitem{search}
+		The CMS Collaboration, Search for the Standard Model Higgs Boson Produced in Association with a W or a Z Boson and Decaying to Bottom Quarks, arXiv:1310.3687, 2013.
+	\bibitem{jets}
+		The CMS Collaboration, Identification of b-quark jets with the CMS experiment, arXiv:1211.4462, 2013.
+	\bibitem{annote}
+		CMS Draft Analysis Note, Search for the Standard Model Higgs Boson Produced in Association with W and Z and Decaying to Bottom Quarks, CMS AN AN-13-069, 2013.
+	\bibitem{procedure}
+		The Atlas Collaboration, the CMS Collaboration, the LHC Higgs Combination Group; Procedure for the LHC Higgs boson search combination in Summer 2011, CMS NOTE-2011/005, 2011.
+	\bibitem{CMSthesis}
+		Giovanni Petrucciani, Observation of a new state in the search for the Higgs boson at CMS, CERN-THESIS-2012-310, 2012.
+	\bibitem{jaynes}
+		E. T. Jaynes, \emph{Probability Theory - The Logic of Science}, Cambridge University Press, 2003.
+	\bibitem{jeffreys}
+		H. Jeffreys, An Invariant Form of the Prior Probability in Estimation Problems, Proc. R. Soc. Lond. 1946 \textbf{186}; doi:10.1098/rspa.1946.0056.
+	\bibitem{sivia}
+		D. S. Sivia, J. Skilling, \emph{Data Analysis - A Bayesian Tutorial}, Oxford University Press, 2006.
+	\bibitem{bretthorst}
+		G. L. Bretthorst, \emph{Bayesian Spectrum Analysis and Parameter Estimation}, Lecture Notes in Statistics 48, Springer Verlag, 1988.
+	\bibitem{kuensch}
+		H. R. K\"unsch, \emph{Bayesian Statistics}, Lecture Notes, ETH Z\"urich (2013); http://stat.ethz.ch/\textasciitilde{}kuensch/teaching/.
+	\bibitem{qbism}
+		C. Fuchs, QBism, the Perimeter of Quantum Bayesianism, arXiv:1003.5209, 2010.
+	\bibitem{schack}
+		R. Schack, Bayesian versus Frequentist Predictions in Quantum Tomography, AIP Conference Proceedings 889, 230 (2007); doi: 10.1063/1.2713461.
+	\bibitem{mcint}
+		T. Snowsill, \emph{mcint} package,  license: (CC BY-NC-SA 3.0 CH); http://pypi.python.org/pypi/mcint/.
+\end{thebibliography}
+
+\end{document}
+%

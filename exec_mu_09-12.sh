@@ -1,0 +1,21 @@
+/home/lappet/anaconda/bin/python matrix.py 0.9 > mu_-09.log
+/home/lappet/anaconda/bin/python matrix.py 1.0 > mu_-10.log
+/home/lappet/anaconda/bin/python matrix.py 1.1 > mu_-11.log
+/home/lappet/anaconda/bin/python matrix.py 1.2 > mu_-12.log
+/home/lappet/anaconda/bin/python matrix.py 0.9 > mu-_09.log
+/home/lappet/anaconda/bin/python matrix.py 1.0 > mu-_10.log
+/home/lappet/anaconda/bin/python matrix.py 1.1 > mu-_11.log
+/home/lappet/anaconda/bin/python matrix.py 1.2 > mu-_12.log
+/home/lappet/anaconda/bin/python matrix.py 0.9 > mu--09.log
+/home/lappet/anaconda/bin/python matrix.py 1.0 > mu--10.log
+/home/lappet/anaconda/bin/python matrix.py 1.1 > mu--11.log
+/home/lappet/anaconda/bin/python matrix.py 1.2 > mu--12.log
+/home/lappet/anaconda/bin/python matrix.py 0.9 > mu__09.log
+/home/lappet/anaconda/bin/python matrix.py 1.0 > mu__10.log
+/home/lappet/anaconda/bin/python matrix.py 1.1 > mu__11.log
+/home/lappet/anaconda/bin/python matrix.py 1.2 > mu__12.log
+/home/lappet/anaconda/bin/python matrix.py 0.9 > _mu__09.log
+/home/lappet/anaconda/bin/python matrix.py 1.0 > _mu__10.log
+/home/lappet/anaconda/bin/python matrix.py 1.1 > _mu__11.log
+/home/lappet/anaconda/bin/python matrix.py 1.2 > _mu__12.log
+

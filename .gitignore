@@ -1,0 +1,20 @@
+# gitignore file
+
+*~
+.*
+!/.gitignore
+*.log
+*.txt
+*.tex
+*.bib
+*.pdf
+*.png
+report.*
+!/report.tex
+datacards/
+matplotlib/
+Plots/
+BDTBlindFinalBoxOpening/
+mu-log/
+WS_to_TH/
+mcint-0.1dev5/
